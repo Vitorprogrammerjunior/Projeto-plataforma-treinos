@@ -29,6 +29,7 @@ class VideoRequest extends FormRequest
                 Rule::unique('videos', 'slug')->ignore($videoId),
             ],
             'description' => ['nullable', 'string', 'max:5000'],
+            'tab_id' => ['nullable', 'exists:tabs,id'],
             'thumbnail' => ['nullable', 'image', 'max:2048'], // Máx 2MB
             'video_file' => ['nullable', 'mimes:mp4,webm,mov', 'max:512000'], // Máx 500MB
             'video_url' => ['nullable', 'url', 'max:500'],

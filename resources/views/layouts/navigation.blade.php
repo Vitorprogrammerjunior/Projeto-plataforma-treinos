@@ -14,12 +14,33 @@
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                     @auth
-                        <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" class="text-gray-300 hover:text-white">
-                            Meus Vídeos
-                        </x-nav-link>
                         @if(auth()->user()->isAdmin())
-                            <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.*')" class="text-gray-300 hover:text-white">
-                                Admin
+                            {{-- Menu para ADMIN --}}
+                            <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')" class="text-gray-300 hover:text-white">
+                                📊 Dashboard
+                            </x-nav-link>
+                            <x-nav-link :href="route('admin.clients')" :active="request()->routeIs('admin.clients*')" class="text-gray-300 hover:text-white">
+                                👥 Clientes
+                            </x-nav-link>
+                            <x-nav-link :href="route('admin.plans.index')" :active="request()->routeIs('admin.plans*')" class="text-gray-300 hover:text-white">
+                                💳 Planos
+                            </x-nav-link>
+                            <x-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users*')" class="text-gray-300 hover:text-white">
+                                👤 Usuários
+                            </x-nav-link>
+                        @else
+                            {{-- Menu para CLIENTE --}}
+                            <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" class="text-gray-300 hover:text-white">
+                                🏠 Início
+                            </x-nav-link>
+                            <x-nav-link :href="route('my.workouts')" :active="request()->routeIs('my.workouts*')" class="text-gray-300 hover:text-white">
+                                💪 Treinos
+                            </x-nav-link>
+                            <x-nav-link :href="route('my.meal-plan')" :active="request()->routeIs('my.meal-plan*')" class="text-gray-300 hover:text-white">
+                                🥗 Dieta
+                            </x-nav-link>
+                            <x-nav-link :href="route('my.videos')" :active="request()->routeIs('my.videos*')" class="text-gray-300 hover:text-white">
+                                🎬 Vídeos
                             </x-nav-link>
                         @endif
                     @else
@@ -46,14 +67,41 @@
                         </x-slot>
 
                         <x-slot name="content">
-                            <x-dropdown-link :href="route('dashboard')">
-                                Meus Vídeos
-                            </x-dropdown-link>
-                            <x-dropdown-link :href="route('subscriptions.index')">
-                                Minhas Assinaturas
-                            </x-dropdown-link>
+                            @if(auth()->user()->isAdmin())
+                                {{-- Dropdown ADMIN --}}
+                                <x-dropdown-link :href="route('admin.dashboard')">
+                                    📊 Dashboard
+                                </x-dropdown-link>
+                                <x-dropdown-link :href="route('admin.clients')">
+                                    👥 Gerenciar Clientes
+                                </x-dropdown-link>
+                                <x-dropdown-link :href="route('admin.plans.index')">
+                                    💳 Gerenciar Planos
+                                </x-dropdown-link>
+                                <x-dropdown-link :href="route('admin.users.index')">
+                                    👤 Ver Usuários
+                                </x-dropdown-link>
+                            @else
+                                {{-- Dropdown CLIENTE --}}
+                                <x-dropdown-link :href="route('dashboard')">
+                                    🏠 Início
+                                </x-dropdown-link>
+                                <x-dropdown-link :href="route('my.workouts')">
+                                    💪 Meus Treinos
+                                </x-dropdown-link>
+                                <x-dropdown-link :href="route('my.meal-plan')">
+                                    🥗 Minha Dieta
+                                </x-dropdown-link>
+                                <x-dropdown-link :href="route('my.videos')">
+                                    🎬 Meus Vídeos
+                                </x-dropdown-link>
+                                <x-dropdown-link :href="route('subscriptions.index')">
+                                    📋 Minhas Assinaturas
+                                </x-dropdown-link>
+                            @endif
+                            
                             <x-dropdown-link :href="route('profile.edit')">
-                                Meu Perfil
+                                ⚙️ Meu Perfil
                             </x-dropdown-link>
 
                             <!-- Authentication -->
@@ -61,7 +109,7 @@
                                 @csrf
                                 <x-dropdown-link :href="route('logout')"
                                         onclick="event.preventDefault(); this.closest('form').submit();">
-                                    Sair
+                                    🚪 Sair
                                 </x-dropdown-link>
                             </form>
                         </x-slot>
@@ -88,15 +136,36 @@
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden bg-gray-800">
         <div class="pt-2 pb-3 space-y-1">
             @auth
-                <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" class="text-gray-300">
-                    Meus Vídeos
-                </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('subscriptions.index')" class="text-gray-300">
-                    Minhas Assinaturas
-                </x-responsive-nav-link>
                 @if(auth()->user()->isAdmin())
-                    <x-responsive-nav-link :href="route('admin.dashboard')" class="text-gray-300">
-                        Painel Admin
+                    {{-- Menu Mobile ADMIN --}}
+                    <x-responsive-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')" class="text-gray-300">
+                        📊 Dashboard
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('admin.clients')" :active="request()->routeIs('admin.clients*')" class="text-gray-300">
+                        👥 Gerenciar Clientes
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('admin.plans.index')" :active="request()->routeIs('admin.plans*')" class="text-gray-300">
+                        💳 Gerenciar Planos
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users*')" class="text-gray-300">
+                        👤 Ver Usuários
+                    </x-responsive-nav-link>
+                @else
+                    {{-- Menu Mobile CLIENTE --}}
+                    <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" class="text-gray-300">
+                        🏠 Início
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('my.workouts')" :active="request()->routeIs('my.workouts*')" class="text-gray-300">
+                        💪 Meus Treinos
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('my.meal-plan')" :active="request()->routeIs('my.meal-plan*')" class="text-gray-300">
+                        🥗 Minha Dieta
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('my.videos')" :active="request()->routeIs('my.videos*')" class="text-gray-300">
+                        🎬 Meus Vídeos
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('subscriptions.index')" class="text-gray-300">
+                        📋 Minhas Assinaturas
                     </x-responsive-nav-link>
                 @endif
             @else

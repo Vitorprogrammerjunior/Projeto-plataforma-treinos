@@ -8,9 +8,15 @@
 
 Plataforma web para venda de vídeos de treino de uma personal trainer chamada "Adri". O modelo de negócio é:
 1. Usuário se cadastra gratuitamente
-2. Visualiza alguns vídeos gratuitos de demonstração
-3. Compra um plano (mensal, trimestral ou anual)
+2. Visualiza vídeos organizados por abas (categorias definidas pelo admin)
+3. Compra um plano (pagamento único ou mensal)
 4. Ganha acesso a todos os vídeos premium durante a vigência do plano
+
+### Modelo Simplificado (v2)
+- **"Pagou, liberou"** - Sistema simples de acesso
+- **Abas** - Vídeos organizados em abas/categorias criadas pelo admin
+- **Planos flexíveis** - Único (one-time) ou mensal (recorrente)
+- **Mercado Pago** - Gateway de pagamento com suporte a PIX, cartão e boleto
 
 ---
 
@@ -24,7 +30,7 @@ Plataforma web para venda de vídeos de treino de uma personal trainer chamada "
 | Tailwind CSS | 3.x | Estilização |
 | Vite | 7.x | Build de assets |
 | Laravel Breeze | - | Autenticação |
-| Stripe | - | Pagamentos (preparado, com modo demo) |
+| Mercado Pago | API v1 | Pagamentos (sandbox para testes) |
 
 ---
 
@@ -56,6 +62,7 @@ ADRI-TREINOS/
 │   │   │   ├── Admin/                          # Controllers do painel administrativo
 │   │   │   │   ├── AdminDashboardController.php   # Dashboard admin com métricas
 │   │   │   │   ├── PlanController.php             # CRUD de planos
+│   │   │   │   ├── TabController.php              # CRUD de abas (categorias)
 │   │   │   │   ├── UserController.php             # Gerenciamento de usuários
 │   │   │   │   └── VideoController.php            # CRUD de vídeos
 │   │   │   ├── DashboardController.php         # Dashboard do usuário logado
@@ -67,29 +74,38 @@ ADRI-TREINOS/
 │   │   │   └── EnsureUserIsAdmin.php           # Verifica se é administrador
 │   │   └── Requests/
 │   │       ├── PlanRequest.php                 # Validação de planos
-│   │       └── VideoRequest.php                # Validação de vídeos
+│   │       └── VideoRequest.php                # Validação de vídeos (inclui tab_id)
 │   ├── Models/
-│   │   ├── Plan.php                            # Modelo de planos de assinatura
+│   │   ├── Plan.php                            # Modelo de planos (com type: single/monthly)
 │   │   ├── Subscription.php                    # Modelo de assinaturas
+│   │   ├── Tab.php                             # Modelo de abas (categorias de vídeos)
 │   │   ├── User.php                            # Modelo de usuários (modificado)
-│   │   └── Video.php                           # Modelo de vídeos
+│   │   └── Video.php                           # Modelo de vídeos (com tab_id)
 │   └── Services/
-│       ├── PaymentService.php                  # Integração com gateway de pagamento
+│       ├── PaymentService.php                  # Integração com Mercado Pago
 │       └── SubscriptionService.php             # Lógica de negócio de assinaturas
 ├── database/
 │   ├── migrations/
 │   │   ├── 2026_01_21_000001_create_plans_table.php
 │   │   ├── 2026_01_21_000002_create_subscriptions_table.php
 │   │   ├── 2026_01_21_000003_create_videos_table.php
-│   │   └── 2026_01_21_000004_add_admin_to_users_table.php
+│   │   ├── 2026_01_21_000004_add_admin_to_users_table.php
+│   │   ├── 2026_01_29_000001_create_tabs_table.php      # Tabela de abas
+│   │   ├── 2026_01_29_000002_add_tab_id_to_videos_table.php
+│   │   └── 2026_01_29_000003_add_type_to_plans_table.php
 │   └── seeders/
 │       ├── AdminSeeder.php                     # Cria usuário admin
 │       ├── PlanSeeder.php                      # Cria planos padrão
+│       ├── TabSeeder.php                       # Cria abas de exemplo
 │       ├── VideoSeeder.php                     # Cria vídeos de exemplo
 │       └── DatabaseSeeder.php                  # Orquestra os seeders
 ├── resources/views/
 │   ├── admin/                                  # Views do painel admin
 │   │   ├── dashboard.blade.php
+│   │   ├── tabs/                               # CRUD de abas
+│   │   │   ├── index.blade.php
+│   │   │   ├── create.blade.php
+│   │   │   └── edit.blade.php
 │   │   ├── videos/
 │   │   │   ├── index.blade.php
 │   │   │   ├── create.blade.php
@@ -141,6 +157,18 @@ ADRI-TREINOS/
 | phone | string | Telefone (nullable) |
 | timestamps | - | created_at, updated_at |
 
+### Tabela: `tabs` (NOVO)
+| Campo | Tipo | Descrição |
+|-------|------|-----------|
+| id | bigint | PK |
+| name | string | Nome da aba (ex: "Treinos Iniciantes") |
+| slug | string | URL amigável |
+| description | text | Descrição da aba |
+| icon | string | Emoji/ícone |
+| order | integer | Ordem de exibição |
+| is_active | boolean | Se está visível |
+| timestamps | - | created_at, updated_at |
+
 ### Tabela: `plans`
 | Campo | Tipo | Descrição |
 |-------|------|-----------|
@@ -149,6 +177,7 @@ ADRI-TREINOS/
 | slug | string | URL amigável (ex: "mensal") |
 | description | text | Descrição do plano |
 | price | decimal(10,2) | Preço em reais |
+| **type** | enum | **single** (único) ou **monthly** (mensal) |
 | duration_days | integer | Duração em dias |
 | features | json | Lista de benefícios |
 | is_active | boolean | Se está ativo |
@@ -161,7 +190,7 @@ ADRI-TREINOS/
 | id | bigint | PK |
 | user_id | bigint | FK para users |
 | plan_id | bigint | FK para plans |
-| payment_id | string | ID do pagamento no gateway |
+| payment_id | string | ID do pagamento no Mercado Pago |
 | payment_status | enum | pending, approved, failed, refunded |
 | amount_paid | decimal(10,2) | Valor pago |
 | starts_at | datetime | Início da assinatura |
@@ -172,14 +201,16 @@ ADRI-TREINOS/
 | Campo | Tipo | Descrição |
 |-------|------|-----------|
 | id | bigint | PK |
+| **tab_id** | bigint | FK para tabs (nullable) - aba onde o vídeo aparece |
+| user_id | bigint | FK para users (nullable) - vídeos personalizados |
 | title | string | Título do vídeo |
 | slug | string | URL amigável |
 | description | text | Descrição |
 | thumbnail | string | Caminho da thumbnail |
 | video_path | string | Caminho do vídeo (local) |
 | video_url | string | URL externa (YouTube, Vimeo) |
-| video_source | enum | local, youtube, vimeo, external |
-| duration | integer | Duração em segundos |
+| video_source | enum | local, external |
+| duration_seconds | integer | Duração em segundos |
 | category | string | Categoria do treino |
 | order | integer | Ordem de exibição |
 | is_active | boolean | Se está ativo |
@@ -252,26 +283,38 @@ Arquivo: `bootstrap/app.php`
 
 ---
 
-## 💳 SISTEMA DE PAGAMENTO
+## 💳 SISTEMA DE PAGAMENTO (Mercado Pago)
 
-### Fluxo Atual (Modo Demo)
+### Fluxo de Pagamento
 1. Usuário clica em "Assinar" em um plano
 2. `PlanController@checkout` cria uma `Subscription` com status `pending`
-3. Redireciona para `/pagamento/demo/{subscription}`
-4. Usuário clica em "Simular Pagamento Aprovado"
-5. `PaymentController@confirmDemo` chama `PaymentService@activateDemo`
-6. Assinatura é ativada com `starts_at = now()` e `expires_at = now() + duration_days`
+3. `PaymentService@createCheckoutSession` cria uma Preference no Mercado Pago
+4. Usuário é redirecionado para página de pagamento do Mercado Pago
+5. Após pagar (PIX, Cartão ou Boleto), é redirecionado de volta
+6. Webhook do Mercado Pago confirma pagamento e ativa assinatura
 
-### Para Produção (Stripe)
-O `PaymentService` já tem a estrutura preparada. Para ativar:
-1. Configurar `.env`:
+### Modo Demo (sem credenciais)
+Se `MERCADO_PAGO_ACCESS_TOKEN` estiver vazio:
+- Redireciona para `/pagamento/demo/{subscription}`
+- Usuário clica em "Simular Pagamento Aprovado"
+- Assinatura é ativada instantaneamente
+
+### Configuração do Mercado Pago
+1. Criar conta em [Mercado Pago Developers](https://www.mercadopago.com.br/developers/panel/app)
+2. Criar aplicação e obter credenciais
+3. Configurar `.env`:
 ```env
-STRIPE_KEY=pk_live_xxx
-STRIPE_SECRET=sk_live_xxx
-STRIPE_WEBHOOK_SECRET=whsec_xxx
+MERCADO_PAGO_ACCESS_TOKEN=APP_USR-xxx...
+MERCADO_PAGO_PUBLIC_KEY=APP_USR-xxx...
+MERCADO_PAGO_WEBHOOK_SECRET=opcional
 ```
-2. Descomentar código em `PaymentService@createCheckoutSession`
-3. Configurar webhook no painel Stripe apontando para `/webhook/stripe`
+4. Em Sandbox, usar credenciais de teste
+5. Configurar webhook apontando para `/webhook/payment`
+
+### Formas de Pagamento Suportadas
+- PIX (instantâneo)
+- Cartão de Crédito (até 12x)
+- Boleto Bancário
 
 ---
 
@@ -288,11 +331,20 @@ STRIPE_WEBHOOK_SECRET=whsec_xxx
 - **is_admin:** false
 
 ### Planos Criados
-| Nome | Preço | Duração |
-|------|-------|---------|
-| Mensal | R$ 49,90 | 30 dias |
-| Trimestral | R$ 119,90 | 90 dias |
-| Anual | R$ 397,00 | 365 dias |
+| Nome | Preço | Tipo | Duração |
+|------|-------|------|---------|
+| Mensal | R$ 49,90 | monthly | 30 dias |
+| Trimestral | R$ 119,90 | single | 90 dias |
+| Anual | R$ 397,00 | single | 365 dias |
+
+### Abas Criadas
+| Nome | Ícone | Descrição |
+|------|-------|-----------|
+| Treinos Iniciantes | 🌱 | Para quem está começando |
+| Treinos Intermediários | 💪 | Base de condicionamento |
+| Treinos Avançados | 🔥 | Desafios intensos |
+| HIIT | ⚡ | Alta intensidade |
+| Alongamentos | 🧘 | Flexibilidade |
 
 ### Vídeos de Exemplo
 - 8 vídeos criados

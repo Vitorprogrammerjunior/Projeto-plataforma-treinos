@@ -89,6 +89,26 @@
                     </div>
                 </div>
 
+                <!-- Aba (Tab) -->
+                <div class="mb-6">
+                    <label class="block text-gray-300 font-medium mb-2">Aba</label>
+                    <select 
+                        name="tab_id"
+                        class="w-full bg-gray-700 border-gray-600 text-white rounded-lg focus:ring-red-500 focus:border-red-500"
+                    >
+                        <option value="">-- Sem aba --</option>
+                        @foreach($tabs as $tab)
+                            <option value="{{ $tab->id }}" {{ old('tab_id', $video->tab_id) == $tab->id ? 'selected' : '' }}>
+                                {{ $tab->icon }} {{ $tab->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                    <p class="text-gray-500 text-sm mt-1">Selecione em qual aba este vídeo aparecerá</p>
+                    @error('tab_id')
+                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
                 <!-- Fonte do Vídeo -->
                 <div class="mb-6">
                     <label class="block text-gray-300 font-medium mb-2">Fonte do Vídeo *</label>

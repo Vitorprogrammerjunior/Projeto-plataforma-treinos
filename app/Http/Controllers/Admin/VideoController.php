@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\VideoRequest;
+use App\Models\Tab;
 use App\Models\Video;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -17,21 +18,25 @@ class VideoController extends Controller
     public function index(Request $request)
     {
         $videos = Video::query()
+            ->with('tab')
             ->when($request->search, fn($q, $s) => $q->where('title', 'like', "%{$s}%"))
             ->when($request->category, fn($q, $c) => $q->where('category', $c))
+            ->when($request->tab, fn($q, $t) => $q->where('tab_id', $t))
             ->ordered()
             ->paginate(15)
             ->withQueryString();
 
         $categories = Video::getCategories();
+        $tabs = Tab::ordered()->get();
 
-        return view('admin.videos.index', compact('videos', 'categories'));
+        return view('admin.videos.index', compact('videos', 'categories', 'tabs'));
     }
 
     public function create()
     {
         $categories = Video::getCategories();
-        return view('admin.videos.create', compact('categories'));
+        $tabs = Tab::active()->ordered()->get();
+        return view('admin.videos.create', compact('categories', 'tabs'));
     }
 
     public function store(VideoRequest $request)
@@ -66,7 +71,8 @@ class VideoController extends Controller
     public function edit(Video $video)
     {
         $categories = Video::getCategories();
-        return view('admin.videos.edit', compact('video', 'categories'));
+        $tabs = Tab::active()->ordered()->get();
+        return view('admin.videos.edit', compact('video', 'categories', 'tabs'));
     }
 
     public function update(VideoRequest $request, Video $video)

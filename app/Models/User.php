@@ -89,4 +89,44 @@ class User extends Authenticatable
         $subscription = $this->activeSubscription;
         return $subscription?->expires_at?->format('d/m/Y');
     }
+
+    /**
+     * Treinos do usuário.
+     */
+    public function workouts(): HasMany
+    {
+        return $this->hasMany(Workout::class)->orderBy('order');
+    }
+
+    /**
+     * Treinos ativos do usuário.
+     */
+    public function activeWorkouts(): HasMany
+    {
+        return $this->hasMany(Workout::class)->where('is_active', true)->orderBy('order');
+    }
+
+    /**
+     * Planos alimentares do usuário.
+     */
+    public function mealPlans(): HasMany
+    {
+        return $this->hasMany(MealPlan::class);
+    }
+
+    /**
+     * Plano alimentar ativo do usuário.
+     */
+    public function activeMealPlan(): HasOne
+    {
+        return $this->hasOne(MealPlan::class)->where('is_active', true)->latest();
+    }
+
+    /**
+     * Vídeos personalizados do usuário.
+     */
+    public function videos(): HasMany
+    {
+        return $this->hasMany(Video::class);
+    }
 }

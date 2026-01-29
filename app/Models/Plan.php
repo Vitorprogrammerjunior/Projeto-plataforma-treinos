@@ -7,6 +7,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Model Plan - Representa os planos de assinatura.
+ * 
+ * Tipos de plano:
+ * - 'single': Pagamento único (acesso por duration_days)
+ * - 'monthly': Assinatura mensal recorrente
  */
 class Plan extends Model
 {
@@ -15,6 +19,7 @@ class Plan extends Model
         'slug',
         'description',
         'price',
+        'type',
         'duration_days',
         'features',
         'is_active',
@@ -42,6 +47,34 @@ class Plan extends Model
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
+    }
+
+    /**
+     * Verifica se é plano de pagamento único.
+     */
+    public function isSinglePayment(): bool
+    {
+        return $this->type === 'single';
+    }
+
+    /**
+     * Verifica se é assinatura mensal.
+     */
+    public function isMonthly(): bool
+    {
+        return $this->type === 'monthly';
+    }
+
+    /**
+     * Retorna label do tipo de plano.
+     */
+    public function getTypeLabelAttribute(): string
+    {
+        return match($this->type) {
+            'single' => 'Pagamento Único',
+            'monthly' => 'Mensal',
+            default => 'Pagamento Único',
+        };
     }
 
     /**

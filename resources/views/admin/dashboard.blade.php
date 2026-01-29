@@ -65,7 +65,20 @@
     </div>
 
     <!-- Quick Actions -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <!-- NOVO: Gerenciar Clientes (PRINCIPAL) -->
+        <a href="{{ route('admin.clients') }}" class="bg-gradient-to-br from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 rounded-xl p-6 flex items-center transition shadow-lg">
+            <div class="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center mr-4">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+            </div>
+            <div>
+                <h3 class="text-white font-bold">Gerenciar Clientes</h3>
+                <p class="text-white/70 text-sm">Treinos, dietas e vídeos</p>
+            </div>
+        </a>
+
         <a href="{{ route('admin.videos.create') }}" class="bg-gray-800 hover:bg-gray-700 rounded-xl p-6 flex items-center transition">
             <div class="w-12 h-12 bg-red-600 rounded-lg flex items-center justify-center mr-4">
                 <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -74,7 +87,7 @@
             </div>
             <div>
                 <h3 class="text-white font-bold">Adicionar Vídeo</h3>
-                <p class="text-gray-400 text-sm">Novo treino para a plataforma</p>
+                <p class="text-gray-400 text-sm">Vídeo geral da plataforma</p>
             </div>
         </a>
 
@@ -97,8 +110,8 @@
                 </svg>
             </div>
             <div>
-                <h3 class="text-white font-bold">Gerenciar Usuários</h3>
-                <p class="text-gray-400 text-sm">Ver acessos e assinaturas</p>
+                <h3 class="text-white font-bold">Ver Usuários</h3>
+                <p class="text-gray-400 text-sm">Acessos e assinaturas</p>
             </div>
         </a>
     </div>

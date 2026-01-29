@@ -3,14 +3,17 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Storage;
 
 /**
- * Model Video - Representa os vídeos de treino.
+ * Model Video - Representa os vídeos de treino personalizados.
  */
 class Video extends Model
 {
     protected $fillable = [
+        'user_id',
+        'tab_id',
         'title',
         'slug',
         'description',
@@ -18,6 +21,9 @@ class Video extends Model
         'video_path',
         'video_url',
         'video_source',
+        'video_type',
+        'file_path',
+        'instructions',
         'duration_seconds',
         'category',
         'order',
@@ -25,6 +31,38 @@ class Video extends Model
         'is_free',
         'views_count',
     ];
+
+    /**
+     * Usuário dono do vídeo.
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Aba onde o vídeo está organizado.
+     */
+    public function tab(): BelongsTo
+    {
+        return $this->belongsTo(Tab::class);
+    }
+
+    /**
+     * Scope para vídeos de um usuário específico.
+     */
+    public function scopeForUser($query, $userId)
+    {
+        return $query->where('user_id', $userId);
+    }
+
+    /**
+     * Scope para vídeos de uma aba específica.
+     */
+    public function scopeForTab($query, $tabId)
+    {
+        return $query->where('tab_id', $tabId);
+    }
 
     protected $casts = [
         'is_active' => 'boolean',

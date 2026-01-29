@@ -35,4 +35,22 @@ return [
         ],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Mercado Pago
+    |--------------------------------------------------------------------------
+    |
+    | Credenciais do Mercado Pago para processamento de pagamentos.
+    | Obtenha suas credenciais em: https://www.mercadopago.com.br/developers/panel/app
+    |
+    | Para sandbox (testes), use as credenciais de teste.
+    | Para produção, use as credenciais de produção.
+    |
+    */
+    'mercadopago' => [
+        'access_token' => env('MERCADO_PAGO_ACCESS_TOKEN'),
+        'public_key' => env('MERCADO_PAGO_PUBLIC_KEY'),
+        'webhook_secret' => env('MERCADO_PAGO_WEBHOOK_SECRET'),
+    ],
+
 ];
